@@ -2,16 +2,17 @@ import pandas as pd
 import spacy
 from wordfreq import word_frequency
 
+PATH = '/content/drive/MyDrive/mistral/data/13428_2018_1099_MOESM2_ESM.csv'
+
 
 class GlasgowNormsLoader:
-    filepath = '/content/drive/MyDrive/mistral/data/13428_2018_1099_MOESM2_ESM.csv'
-    filepath = '/Users/fhipola/Documents/github/cogsci_thesis/cosgci/data/13428_2018_1099_MOESM2_ESM.csv'
+    filepath = PATH
 
     def __init__(self, filepath=filepath) -> None:
         # Load SpaCy English language model
         self.nlp = spacy.load("en_core_web_sm")
         self.df = None
-        self.filepath
+        self.filepath = filepath
 
     def load_df_glasgow_norms(self, collapse_cols: bool = True) -> pd.DataFrame:
         # Define the file path
@@ -65,10 +66,12 @@ class GlasgowNormsLoader:
 
     @property
     def df_non_polisemic_nouns(self) -> pd.DataFrame:
-        mask = (self.df.category == "NOUN") & ~(self.df.is_polisemic)
+        mask = (self.df.category == "NOUN") & ~self.df.is_polisemic
         return self.df[mask]
 
+
 if __name__ == "__main__":
-    glasgow_norms_loader = GlasgowNormsLoader()
+    local_pth = "/Users/fhipola/Documents/github/cogsci_thesis/cosgci/data/13428_2018_1099_MOESM2_ESM.csv"
+    glasgow_norms_loader = GlasgowNormsLoader(filepath=local_pth)
     glasgow_norms_loader.load_df()
     glasgow_norms_loader.df.category.value_counts()
