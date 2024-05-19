@@ -6,7 +6,7 @@ authors = ["fhipol <fernando.jesus.garcia.hipola@vinted.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "3.12.2"
+python = "3.10.12"
 pandas = "2.0.3"
 spacy = "3.7.4"
 wordfreq = "3.1.1"
