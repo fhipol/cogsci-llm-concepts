@@ -6,9 +6,8 @@ PATH = '/content/drive/MyDrive/mistral/data/13428_2018_1099_MOESM2_ESM.csv'
 
 
 class GlasgowNormsLoader:
-    filepath = PATH
 
-    def __init__(self, filepath=filepath) -> None:
+    def __init__(self, filepath=PATH) -> None:
         # Load SpaCy English language model
         self.nlp = spacy.load("en_core_web_sm")
         self.df = None
