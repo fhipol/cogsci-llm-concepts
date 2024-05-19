@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "cogsci-thesis"
+version = "0.1.0"
+description = ""
+authors = ["fhipol <fernando.jesus.garcia.hipola@vinted.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.12.2"
+pandas = "2.0.3"
+spacy = "3.7.4"
+wordfreq = "3.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
