@@ -1,0 +1,81 @@
+import dask.dataframe as dd
+import time
+import pandas as pd
+import pyarrow.parquet as pq
+import os
+
+
+class ExperimentDataImporter:
+    cols_activations = [str(x) for x in range(4095 + 1)]
+    path_activations = "/content/drive/MyDrive/mistral/data/activations"
+
+    def __init__(self, layer_name: str):
+        drive.mount('/content/drive')
+
+        self.df = None
+        self.df_metadata = None
+        self.layer_name = layer_name
+        self.experiment = 1
+        self.model_name = "mistral"
+        self.n_layers = [0, 3, 10, 17, 24, 31]
+        self.n_max = 50
+
+        df_dask = dd.read_parquet(self.path_parquets_per_word)
+        mask = (df_dask['n_layer'].isin(self.n_layers)) & \
+               (df_dask['n'] < self.n_max)
+
+        self.path_parquets_per_word = f"{self.path_activations}/{self.model_name}/{self.experiment}/{self.layer_name}"
+        self.df_dask = df_dask[mask].reset_index(drop=True)
+
+    def export_df_as_gathered_data(self) -> None:
+        path = f"{self.path_activations}s/{self.model_name}/gathered/"
+        filename = f"tmp={self.experiment}_layer={self.layer_name}_model={self.model_name}_t=0.parquet"
+        full_path = os.path.join(path, filename)
+        df_to_export = importer.df.reset_index(drop=True)
+        df_to_export.to_parquet(full_path, engine="pyarrow")
+        print("done")
+
+    def load_df_metadata(self) -> pd.DataFrame:
+        path = self.path_parquets_per_word
+        parquet_files = [f for f in os.listdir(path) if f.endswith('.parquet')]
+        metadata_list = []
+
+        total_files = len(parquet_files)
+        for i, file in enumerate(parquet_files, 1):
+            file_path = os.path.join(path, file)
+            metadata = pq.read_metadata(file_path)
+            metadata_list.append(metadata)
+            print(f'Processed {i}/{total_files} files: {file}')
+
+        df = pd.DataFrame([
+            {
+                "template": metadata.metadata[b"template"],
+                "output": metadata.metadata[b"output"],
+                "word": metadata.metadata[b"word"],
+                "prompt": metadata.metadata[b"prompt"]
+            }
+            for metadata in metadata_list
+        ])
+
+        df = df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
+        df["layer_name"] = self.layer_name
+        df["experiment"] = self.experiment
+        df["model_name"] = self.model_name
+
+        self.df_metadata = df
+        return df
+
+    def import_df_from_gathered(self) -> pd.DataFrame:
+        """
+        It imports the data from the gathered parquet
+        """
+        path = f"{self.path_activations}/{self.model_name}/gathered/tmp=1_layer={self.layer_name}_model={self.model_name}_t=0.parquet"
+        df = pd.read_parquet(path)
+        return df
+
+    def import_from_parquets(self) -> pd.DataFrame:
+        start_time = time.time()
+        self.df = self.df_dask.compute()
+        end_time = time.time()
+        print(f"Time taken: {end_time - start_time} seconds")
+        return self.df
