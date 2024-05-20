@@ -10,7 +10,6 @@ class ExperimentDataImporter:
     path_activations = "/content/drive/MyDrive/mistral/data/activations"
 
     def __init__(self, layer_name: str):
-        drive.mount('/content/drive')
 
         self.df = None
         self.df_metadata = None
@@ -19,19 +18,19 @@ class ExperimentDataImporter:
         self.model_name = "mistral"
         self.n_layers = [0, 3, 10, 17, 24, 31]
         self.n_max = 50
+        self.path_parquets_per_word = f"{self.path_activations}/{self.model_name}/{self.experiment}/{self.layer_name}"
 
         df_dask = dd.read_parquet(self.path_parquets_per_word)
         mask = (df_dask['n_layer'].isin(self.n_layers)) & \
                (df_dask['n'] < self.n_max)
 
-        self.path_parquets_per_word = f"{self.path_activations}/{self.model_name}/{self.experiment}/{self.layer_name}"
         self.df_dask = df_dask[mask].reset_index(drop=True)
 
     def export_df_as_gathered_data(self) -> None:
         path = f"{self.path_activations}s/{self.model_name}/gathered/"
         filename = f"tmp={self.experiment}_layer={self.layer_name}_model={self.model_name}_t=0.parquet"
         full_path = os.path.join(path, filename)
-        df_to_export = importer.df.reset_index(drop=True)
+        df_to_export = self.df.reset_index(drop=True)
         df_to_export.to_parquet(full_path, engine="pyarrow")
         print("done")
 
