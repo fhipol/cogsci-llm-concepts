@@ -1,12 +1,9 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-
 from sklearn.linear_model import Ridge
 from sklearn.metrics import r2_score, mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPRegressor
-
-from typing import List
 
 from cogsci.probing.data_processor import DataProocessor
 
@@ -17,6 +14,7 @@ def plot_predictions_probe(df_plot,
                            y_lim_min=1,
                            y_lim_max=9
                            ):
+
     # Group by 'word' & calculate the mean & std for 'IMAG_M' and 'IMAG_M_pred'
     group_by = 'word'
 
@@ -126,7 +124,6 @@ class ProbeExecutor:
     def __init__(self,
                  df_acts_with_norms,
                  ml_model_key: str,
-                 cols_acts: List[str],
                  n_components=None,
                  ):
 
@@ -138,7 +135,6 @@ class ProbeExecutor:
 
         # the number of components used in the pre-PCA, None if no PCA performed
         self.n_components = n_components
-        self.cols_acts = cols_acts
         pd.options.mode.chained_assignment = None
 
     def run_probe_for_psy_dim(self,
@@ -191,7 +187,6 @@ class ProbeExecutor:
     def run(self):
         for n_layer in self.n_layers:
             data_processor = DataProocessor(df=self.df_acts_with_norms,
-                                            cols_acts=self.cols_acts,
                                             n_layer=n_layer,
                                             n_components=self.n_components,
                                             )

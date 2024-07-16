@@ -4,9 +4,11 @@ import pandas as pd
 import pyarrow.parquet as pq
 import os
 
+from cogsci.common import MISTRAL_COLS_ACTIVATIONS
+
 
 class ExperimentDataImporter:
-    cols_activations = [str(x) for x in range(4095 + 1)]
+    cols_activations = MISTRAL_COLS_ACTIVATIONS
     path_activations = "/content/drive/MyDrive/mistral/data/activations"
 
     def __init__(self, layer_name: str):

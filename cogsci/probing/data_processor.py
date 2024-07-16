@@ -4,12 +4,15 @@ import matplotlib as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
+from cogsci.common import MISTRAL_COLS_ACTIVATIONS
+
 
 class DataProocessor:
 
+    cols_acts = MISTRAL_COLS_ACTIVATIONS
+
     def __init__(self,
                  df,
-                 cols_acts: list,
                  n_layer: int,
                  n_components=None,
                  standarization="standard",
@@ -18,13 +21,12 @@ class DataProocessor:
         self.n_layer = n_layer
         self.df_layer = df[df.n_layer == self.n_layer]
         self.standarization = standarization
-        self.cols_acts = cols_acts
 
         if n_components:
             do_all_components = n_components == "all"
             self.pca = PCA() if do_all_components else PCA(n_components)
             self.n_components = len(
-                cols_acts) if do_all_components else n_components
+                self.cols_acts) if do_all_components else n_components
         else:
             self.n_components = False
 
