@@ -34,16 +34,20 @@ class ExperimentDataImporter:
         self.df_dask = df_dask[mask].reset_index(drop=True)
 
     def export_df_as_gathered_data(self) -> None:
-        path = f"{self.path_activations}s/{self.model_name}/gathered/"
+        path = f"{self.path_activations}/{self.model_name}/gathered/"
         filename = f"tmp={self.n_experiment}_layer={self.layer_name}_model={self.model_name}_t={self.temperature}.parquet"
         full_path = os.path.join(path, filename)
         df_to_export = self.df_dask.reset_index(drop=True)
-        print(f"writing full parquet into {full_path}")
+        print(f"Writing full parquet into {full_path}")
+
         with ProgressBar():
-            df_to_export.to_parquet(full_path, engine="pyarrow",
+            df_to_export.to_parquet(full_path,
+                                    engine="pyarrow",
+                                    write_index=False,
+                                    single_file=True,
                                     compute_kwargs={'scheduler': 'processes'})
 
-        print("done")
+        print("Done")
 
     def load_df_metadata(self) -> pd.DataFrame:
         path = self.path_parquets_per_word
