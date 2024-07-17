@@ -42,9 +42,9 @@ class ExperimentDataImporter:
         os.makedirs(path, exist_ok=True)
         print(f"Writing full parquet into {full_path}")
 
-        # Coalesce to one partition and write directly from Dask DF to a parquet
+        # Repartition to one partition and write directly from Dask DataFrame to a Parquet file
         with ProgressBar():
-            self.df_dask.coalesce(1).to_parquet(
+            self.df_dask.repartition(npartitions=1).to_parquet(
                 full_path,
                 engine='pyarrow',
                 write_index=False,
