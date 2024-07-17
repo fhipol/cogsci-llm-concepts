@@ -37,15 +37,16 @@ class ExperimentDataImporter:
         path = f"{self.path_activations}/{self.model_name}/gathered/"
         filename = f"tmp={self.n_experiment}_layer={self.layer_name}_model={self.model_name}_t={self.temperature}.parquet"
         full_path = os.path.join(path, filename)
+
         df_to_export = self.df_dask.reset_index(drop=True)
         print(f"Writing full parquet into {full_path}")
 
+        # Convert Dask DataFrame to Pandas DataFrame
         with ProgressBar():
-            df_to_export.to_parquet(full_path,
-                                    engine="pyarrow",
-                                    write_index=False,
-                                    single_file=True,
-                                    compute_kwargs={'scheduler': 'processes'})
+            df_to_export = df_to_export.compute(scheduler='processes')
+
+        # Write the Pandas DataFrame to a single Parquet file
+        df_to_export.to_parquet(full_path, engine="pyarrow", index=False)
 
         print("Done")
 
