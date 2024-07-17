@@ -37,7 +37,7 @@ class ExperimentDataImporter:
         path = f"{self.path_activations}/{self.model_name}/gathered/"
         filename = f"tmp={self.n_experiment}_layer={self.layer_name}_model={self.model_name}_t=0.parquet"
         full_path = os.path.join(path, filename)
-        self.df = self.import_df_from_gathered().reset_index(drop=True)
+        self.import_from_parquets()
         self.df.to_parquet(full_path, engine="pyarrow")
         print("done")
 
@@ -81,7 +81,7 @@ class ExperimentDataImporter:
 
     def import_from_parquets(self) -> pd.DataFrame:
         start_time = time.time()
-        self.df = self.df_dask.compute()
+        self.df = self.df_dask.compute().reset_index(drop=True)
         end_time = time.time()
         print(f"Time taken: {end_time - start_time} seconds")
         return self.df
