@@ -11,16 +11,20 @@ class ExperimentDataImporter:
     cols_activations = MISTRAL_COLS_ACTIVATIONS
     path_activations = "/content/drive/MyDrive/mistral/data/activations"
 
-    def __init__(self, layer_name: str):
+    def __init__(self,
+                 layer_name: str,
+                 n_experiment: int,
+                 model_name="mistral"):
 
         self.df = None
         self.df_metadata = None
         self.layer_name = layer_name
-        self.experiment = 1
-        self.model_name = "mistral"
+        self.n_experiment = n_experiment
+        self.model_name = model_name
         self.n_layers = [0, 3, 10, 17, 24, 31]
         self.n_max = 50
-        self.path_parquets_per_word = f"{self.path_activations}/{self.model_name}/{self.experiment}/{self.layer_name}"
+        self.path_parquets_per_word = f"{self.path_activations}/{self.model_name}/{self.n_experiment}/{self.layer_name}"
+        self.temperature = 0
 
         df_dask = dd.read_parquet(self.path_parquets_per_word)
         mask = (df_dask['n_layer'].isin(self.n_layers)) & \
@@ -30,7 +34,7 @@ class ExperimentDataImporter:
 
     def export_df_as_gathered_data(self) -> None:
         path = f"{self.path_activations}s/{self.model_name}/gathered/"
-        filename = f"tmp={self.experiment}_layer={self.layer_name}_model={self.model_name}_t=0.parquet"
+        filename = f"tmp={self.n_experiment}_layer={self.layer_name}_model={self.model_name}_t={self.temperature}.parquet"
         full_path = os.path.join(path, filename)
         df_to_export = self.df.reset_index(drop=True)
         df_to_export.to_parquet(full_path, engine="pyarrow")
@@ -60,7 +64,7 @@ class ExperimentDataImporter:
 
         df = df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
         df["layer_name"] = self.layer_name
-        df["experiment"] = self.experiment
+        df["experiment"] = self.n_experiment
         df["model_name"] = self.model_name
 
         self.df_metadata = df
@@ -70,7 +74,7 @@ class ExperimentDataImporter:
         """
         It imports the data from the gathered parquet
         """
-        path = f"{self.path_activations}/{self.model_name}/gathered/tmp=1_layer={self.layer_name}_model={self.model_name}_t=0.parquet"
+        path = f"{self.path_activations}/{self.model_name}/gathered/tmp={self.n_experiment}_layer={self.layer_name}_model={self.model_name}_t={self.temperature}.parquet"
         df = pd.read_parquet(path)
         return df
 
