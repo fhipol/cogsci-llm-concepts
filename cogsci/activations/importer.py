@@ -39,7 +39,6 @@ class ExperimentDataImporter:
         full_path = os.path.join(path, filename)
 
         # Ensure the directory exists
-        os.makedirs(path, exist_ok=True)
         print(f"Writing full parquet into {full_path}")
 
         # Write directly from Dask DataFrame to a Parquet file
