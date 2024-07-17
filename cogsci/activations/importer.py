@@ -33,27 +33,13 @@ class ExperimentDataImporter:
 
         self.df_dask = df_dask[mask].reset_index(drop=True)
 
-    def export_df_as_gathered_data(self) -> None:
+    def export_df_as_gathered_data(self):
         path = f"{self.path_activations}/{self.model_name}/gathered/"
-        filename = f"tmp={self.n_experiment}_layer={self.layer_name}_model={self.model_name}_t={self.temperature}.parquet"
+        filename = f"tmp={self.n_experiment}_layer={self.layer_name}_model={self.model_name}_t=0.parquet"
         full_path = os.path.join(path, filename)
-
-        # Ensure the directory exists
-        os.makedirs(path, exist_ok=True)
-        print(f"Writing full parquet into {full_path}")
-
-        # Repartition to one partition and write directly from Dask DataFrame to a Parquet file
-        with ProgressBar():
-            self.df_dask.repartition(npartitions=1).to_parquet(
-                full_path,
-                engine='pyarrow',
-                write_index=False,
-                compression='snappy',
-                append=False
-                # This ensures the data is written to a single file
-            )
-
-        print("Done")
+        self.df = self.import_df_from_gathered().reset_index(drop=True)
+        self.df.to_parquet(full_path, engine="pyarrow")
+        print("done")
 
     def load_df_metadata(self) -> pd.DataFrame:
         path = self.path_parquets_per_word
