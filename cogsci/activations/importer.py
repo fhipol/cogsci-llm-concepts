@@ -1,4 +1,5 @@
 import dask.dataframe as dd
+from dask.diagnostics import ProgressBar
 import time
 import pandas as pd
 import pyarrow.parquet as pq
@@ -37,7 +38,11 @@ class ExperimentDataImporter:
         filename = f"tmp={self.n_experiment}_layer={self.layer_name}_model={self.model_name}_t={self.temperature}.parquet"
         full_path = os.path.join(path, filename)
         df_to_export = self.df_dask.reset_index(drop=True)
-        df_to_export.to_parquet(full_path, engine="pyarrow")
+
+        with ProgressBar():
+            df_to_export.to_parquet(full_path, engine="pyarrow",
+                                    compute_kwargs={'scheduler': 'processes'})
+
         print("done")
 
     def load_df_metadata(self) -> pd.DataFrame:
