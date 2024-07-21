@@ -38,6 +38,7 @@ class ExperimentDataImporter:
         filename = f"tmp={self.n_experiment}_layer={self.layer_name}_model={self.model_name}_t=0.parquet"
         full_path = os.path.join(path, filename)
         self.import_from_parquets()
+        print("parquets imported into Memory, now write them to single parquet")
         self.df.to_parquet(full_path, engine="pyarrow")
         print("done")
 
