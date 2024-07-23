@@ -39,7 +39,7 @@ class ExperimentDataImporter:
         full_path = os.path.join(path, filename)
         self.import_from_parquets()
         print("parquets imported into Memory, now write them to single parquet")
-        self.df.to_parquet(full_path, engine="pyarrow")
+        self.df.to_parquet(full_path)
         print("done")
 
     def load_df_metadata(self) -> pd.DataFrame:

@@ -108,7 +108,7 @@ class ProbeExecutor:
 
     ML_MODELS = {
         "ridge": Ridge(alpha=1.0),
-        "multi": MLPRegressor(
+        "multiperceptron": MLPRegressor(
             hidden_layer_sizes=(100,),
             activation='relu',
             solver='adam',
@@ -116,9 +116,9 @@ class ProbeExecutor:
             learning_rate='adaptive',
             learning_rate_init=0.001,
             max_iter=200),
-        "GradientBoostingRegressor": {"n_estimators": 100,
-                                      "learning_rate": 0.1,
-                                      "max_depth": 3}
+        "gradient_regressor": {"n_estimators": 100,
+                               "learning_rate": 0.1,
+                               "max_depth": 3}
     }
 
     def __init__(self,
