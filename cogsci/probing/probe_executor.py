@@ -4,6 +4,7 @@ from sklearn.linear_model import Ridge
 from sklearn.metrics import r2_score, mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPRegressor
+from sklearn.ensemble import GradientBoostingRegressor
 
 from cogsci.probing.data_processor import DataProocessor
 
@@ -11,10 +12,10 @@ from cogsci.probing.data_processor import DataProocessor
 def plot_predictions_probe(df_plot,
                            psy_dim,
                            n_layer,
+                           n_exp: int,
                            y_lim_min=1,
-                           y_lim_max=9
+                           y_lim_max=9,
                            ):
-
     # Group by 'word' & calculate the mean & std for 'IMAG_M' and 'IMAG_M_pred'
     group_by = 'word'
 
@@ -60,7 +61,7 @@ def plot_predictions_probe(df_plot,
 
     plt.xlabel('Words')
     plt.ylabel('Values')
-    plt.title(f'{psy_dim} vs {psy_dim}_pred for Layer {n_layer}')
+    plt.title(f'Exp {n_exp} {psy_dim} vs {psy_dim}_pred for Layer {n_layer}')
 
     # Show every nth word on the x-axis (because they are thousands of words)
     n = 20
@@ -74,8 +75,7 @@ def plot_predictions_probe(df_plot,
     plt.show()
 
 
-def plot_results_from_probes(df_results):
-
+def plot_results_from_probes(df_results, n_exp: int):
     plt.figure(figsize=(10, 6))
 
     for psy_dim in df_results['psy_dim'].unique():
@@ -87,7 +87,7 @@ def plot_results_from_probes(df_results):
 
     plt.xlabel('Number of Layers')
     plt.ylabel('R2 Score')
-    plt.title('R2 Score vs Number of Layers by psy_dim')
+    plt.title(f'R2 Score vs Number of Layers by psy_dim for experiment {n_exp}')
     plt.legend(title='psy_dim')
     plt.grid(True)
     plt.show()
@@ -115,13 +115,15 @@ class ProbeExecutor:
             learning_rate='adaptive',
             learning_rate_init=0.001,
             max_iter=200),
-        "gradient_regressor": {"n_estimators": 100,
-                               "learning_rate": 0.1,
-                               "max_depth": 3}
+        "gradient_regressor": GradientBoostingRegressor(
+            n_estimators=100,
+            learning_rate=0.1,
+            max_depth=3)
     }
 
     def __init__(self,
                  df_acts_with_norms,
+                 n_experiment: int,
                  ml_model_key: str,
                  n_components=None,
                  ):
@@ -134,10 +136,11 @@ class ProbeExecutor:
 
         # the number of components used in the pre-PCA, None if no PCA performed
         self.n_components = n_components
+        self.n_experiment = n_experiment
         pd.options.mode.chained_assignment = None
 
     def run_probe_for_psy_dim(self,
-                              data_processor,
+                              data_processor: DataProocessor,
                               psy_dim: str,
                               n_layer: str
                               ):
@@ -185,7 +188,9 @@ class ProbeExecutor:
 
     @property
     def df_results(self) -> pd.DataFrame:
-        return pd.DataFrame(self.data)
+        df = pd.DataFrame(self.data)
+        df["n_experiment"] = self.n_experiment
+        return
 
     def run(self):
         for n_layer in self.n_layers:
@@ -200,8 +205,9 @@ class ProbeExecutor:
                 plot_predictions_probe(df_plot=data_processor.df_layer,
                                        psy_dim=psy_dim,
                                        n_layer=n_layer,
+                                       n_exp=self.n_experiment,
                                        y_lim_min=-5,
                                        y_lim_max=5
                                        )
 
-        plot_results_from_probes(self.df_results)
+        plot_results_from_probes(self.df_results, n_exp=self.n_experiment)
