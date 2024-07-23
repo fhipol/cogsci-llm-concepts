@@ -74,8 +74,7 @@ def plot_predictions_probe(df_plot,
     plt.show()
 
 
-def plot_results_from_probes(data):
-    df_results = pd.DataFrame(data)
+def plot_results_from_probes(df_results):
 
     plt.figure(figsize=(10, 6))
 
@@ -184,6 +183,10 @@ class ProbeExecutor:
             "ml_model": self.ml_model_key
         })
 
+    @property
+    def df_results(self) -> pd.DataFrame:
+        return pd.DataFrame(self.data)
+
     def run(self):
         for n_layer in self.n_layers:
             data_processor = DataProocessor(df=self.df_acts_with_norms,
@@ -201,4 +204,4 @@ class ProbeExecutor:
                                        y_lim_max=5
                                        )
 
-        plot_results_from_probes(self.data)
+        plot_results_from_probes(self.df_results)
