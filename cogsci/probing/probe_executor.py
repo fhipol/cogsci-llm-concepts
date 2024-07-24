@@ -190,7 +190,7 @@ class ProbeExecutor:
     def df_results(self) -> pd.DataFrame:
         df = pd.DataFrame(self.data)
         df["n_experiment"] = self.n_experiment
-        return
+        return df
 
     def run(self):
         for n_layer in self.n_layers:
