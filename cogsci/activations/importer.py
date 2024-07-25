@@ -4,6 +4,7 @@ import time
 import pandas as pd
 import pyarrow.parquet as pq
 import os
+import gc
 
 from cogsci.common import MISTRAL_COLS_ACTIVATIONS
 
@@ -45,7 +46,6 @@ class ExperimentDataImporter:
         path = self.path_parquets_per_word
         parquet_files = [f for f in os.listdir(path)
                          if f.endswith('.parquet')
-                         and not "relay" in f
                          # < this file cannot be processed.
                          # my theory, GDrive restricts reading cause the slung
                          ]
@@ -61,6 +61,8 @@ class ExperimentDataImporter:
             print(f'Processing {i}/{total_files} files: {file}')
             metadata = pq.read_metadata(file_path)
             metadata_list.append(metadata)
+            time.sleep(0.1)
+            gc.collect()
 
         df = pd.DataFrame([
             {
