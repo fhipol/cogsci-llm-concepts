@@ -61,7 +61,7 @@ def plot_predictions_probe(df_plot,
 
     plt.xlabel('Words')
     plt.ylabel('Values')
-    plt.title(f'Exp {n_exp} {psy_dim} vs {psy_dim}_pred for Layer {n_layer}')
+    plt.title(f'Experiment {n_exp} - {psy_dim} vs {psy_dim}_pred for Layer {n_layer}')
 
     # Show every nth word on the x-axis (because they are thousands of words)
     n = 20
@@ -87,7 +87,7 @@ def plot_results_from_probes(df_results, n_exp: int):
 
     plt.xlabel('Number of Layers')
     plt.ylabel('R2 Score')
-    plt.title(f'R2 Score vs Number of Layers by psy_dim for experiment {n_exp}')
+    plt.title(f'R2 Validation Score vs nth layer by psy_dim for experiment {n_exp}')
     plt.legend(title='psy_dim')
     plt.grid(True)
     plt.show()
