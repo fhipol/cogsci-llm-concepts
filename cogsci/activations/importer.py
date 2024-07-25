@@ -45,7 +45,7 @@ class ExperimentDataImporter:
         path = self.path_parquets_per_word
         parquet_files = [f for f in os.listdir(path)
                          if f.endswith('.parquet')
-                         and not "whore" in f
+                         and not "relay" in f
                          # < this file cannot be processed.
                          # my theory, GDrive restricts reading cause the slung
                          ]
