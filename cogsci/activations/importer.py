@@ -58,9 +58,9 @@ class ExperimentDataImporter:
             file_path = os.path.join(path, file)
 
             # TODO: if this takes more than one minute, retry it:
+            print(f'Processing {i}/{total_files} files: {file}')
             metadata = pq.read_metadata(file_path)
             metadata_list.append(metadata)
-            print(f'Processed {i}/{total_files} files: {file}')
 
         df = pd.DataFrame([
             {
