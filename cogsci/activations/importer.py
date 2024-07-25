@@ -16,7 +16,6 @@ class ExperimentDataImporter:
                  layer_name: str,
                  n_experiment: int,
                  model_name="mistral"):
-
         self.df = None
         self.df_metadata = None
         self.layer_name = layer_name
@@ -44,12 +43,21 @@ class ExperimentDataImporter:
 
     def load_df_metadata(self) -> pd.DataFrame:
         path = self.path_parquets_per_word
-        parquet_files = [f for f in os.listdir(path) if f.endswith('.parquet')]
+        parquet_files = [f for f in os.listdir(path)
+                         if f.endswith('.parquet')
+                         and not "whore" in f
+                         # < this file cannot be processed.
+                         # my theory, GDrive restricts reading cause the slung
+                         ]
+
         metadata_list = []
 
         total_files = len(parquet_files)
+
         for i, file in enumerate(parquet_files, 1):
             file_path = os.path.join(path, file)
+
+            # TODO: if this takes more than one minute, retry it:
             metadata = pq.read_metadata(file_path)
             metadata_list.append(metadata)
             print(f'Processed {i}/{total_files} files: {file}')
