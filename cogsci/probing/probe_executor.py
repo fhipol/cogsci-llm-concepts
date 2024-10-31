@@ -8,11 +8,26 @@ from sklearn.ensemble import GradientBoostingRegressor
 
 from cogsci.probing.data_processor import DataProocessor
 
+PSY_DIMS = ['AROU_M',
+            'VAL_M',
+            'DOM_M',
+            'CNC_M',
+            'IMAG_M',
+            'FAM_M',
+            'AOA_M',
+            'SIZE_M',
+            'GEND_M'
+            ]
+
+# used for consistent mapping between each psy_dim and series graph color
+COLOR_MAP = {dim: plt.cm.get_cmap('tab10', len(PSY_DIMS))(i)
+             for i, dim in enumerate(PSY_DIMS)
+             }
+
 
 def plot_predictions_probe(df_plot,
                            psy_dim,
-                           n_layer,
-                           n_exp: int,
+                           title,
                            y_lim_min=1,
                            y_lim_max=9,
                            ):
@@ -35,11 +50,13 @@ def plot_predictions_probe(df_plot,
 
     plt.figure(figsize=(12, 6))
 
-    # Plot actual values as a smooth line
+    # Plot actual PSY_DIM mean values as a smooth line
     plt.plot(df_grouped['word'],
              df_grouped[f'{psy_dim}_mean'],
              label=f'{psy_dim}',
-             color='darkgreen')
+             color=COLOR_MAP[psy_dim],
+             linewidth=2,
+             )
 
     # Shaded prediction std zone
     plt.fill_between(df_grouped['word'],
@@ -47,21 +64,21 @@ def plot_predictions_probe(df_plot,
                          f'{psy_dim}_pred_std'],
                      df_grouped[f'{psy_dim}_pred_mean'] + df_grouped[
                          f'{psy_dim}_pred_std'],
-                     color='lightblue',
+                     color='silver',
                      alpha=0.5,
-                     label='IMAG_pred_std')
+                     label=f'{psy_dim}_pred_std')
 
     # Scatter plot for prediction mean values
     plt.scatter(df_grouped['word'],
                 df_grouped[f'{psy_dim}_pred_mean'],
                 label=f'{psy_dim}_pred',
-                color='darkblue',
+                color='black',
                 marker='o',
                 s=2)
 
     plt.xlabel('Words')
     plt.ylabel('Values')
-    plt.title(f'Experiment {n_exp} - {psy_dim} vs {psy_dim}_pred for Layer {n_layer}')
+    plt.title(title)
 
     # Show every nth word on the x-axis (because they are thousands of words)
     n = 20
@@ -75,7 +92,10 @@ def plot_predictions_probe(df_plot,
     plt.show()
 
 
-def plot_results_from_probes(df_results, n_exp: int):
+def plot_results_from_probes(df_results,
+                             n_exp: int,
+                             y_lim: tuple = None,
+                             show_legend: bool = False):
     plt.figure(figsize=(10, 6))
 
     for psy_dim in df_results['psy_dim'].unique():
@@ -83,28 +103,27 @@ def plot_results_from_probes(df_results, n_exp: int):
         plt.plot(subset['n_layer'],
                  subset['R2_val'],
                  marker='o',
-                 label=f'psy_dim {psy_dim}')
+                 label=f'psy_dim {psy_dim}',
+                 color=COLOR_MAP[psy_dim]
+                 )
 
     plt.xlabel('Number of Layers')
     plt.ylabel('R2 Score')
-    plt.title(f'R2 Validation Score vs nth layer by psy_dim for experiment {n_exp}')
-    plt.legend(title='psy_dim')
+    plt.title(
+        f'R2 Validation Score vs nth layer by psy_dim for experiment {n_exp}')
+
+    if show_legend:
+        plt.legend(title='psy_dim')
+
     plt.grid(True)
+
+    if y_lim:
+        plt.ylim(y_lim)
+
     plt.show()
 
 
 class ProbeExecutor:
-    psy_dims = ['AROU_M',
-                'VAL_M',
-                'DOM_M',
-                'CNC_M',
-                'IMAG_M',
-                'FAM_M',
-                'AOA_M',
-                'SIZE_M',
-                'GEND_M'
-                ]
-
     ML_MODELS = {
         "ridge": Ridge(alpha=1.0),
         "multiperceptron": MLPRegressor(
@@ -143,7 +162,7 @@ class ProbeExecutor:
                               data_processor: DataProocessor,
                               psy_dim: str,
                               n_layer: str
-                              ):
+                              ) -> dict:
 
         y = data_processor.get_y(col_name=psy_dim)
         # y_scaled = (df_n_layer[psy_dim] - 1) / (9 - 1)
@@ -176,7 +195,7 @@ class ProbeExecutor:
         print(f"Mean Squared Error: {mse_val}")
         print("---------------------")
 
-        self.data.append({
+        data_record = {
             "n_layer": n_layer,
             "psy_dim": psy_dim,
             "R2_train": R2_train,
@@ -184,7 +203,10 @@ class ProbeExecutor:
             "R2_val": R2_val,
             "mse_val": mse_val,
             "ml_model": self.ml_model_key
-        })
+        }
+
+        self.data.append(data_record)
+        return data_record
 
     @property
     def df_results(self) -> pd.DataFrame:
@@ -193,6 +215,7 @@ class ProbeExecutor:
         return df
 
     def run(self):
+
         for n_layer in self.n_layers:
             data_processor = DataProocessor(df=self.df_acts_with_norms,
                                             n_layer=n_layer,
@@ -200,14 +223,25 @@ class ProbeExecutor:
                                             )
             self.X = data_processor.get_X()
 
-            for psy_dim in self.psy_dims:
-                self.run_probe_for_psy_dim(data_processor, psy_dim, n_layer)
+            for psy_dim in PSY_DIMS:
+                data_record = self.run_probe_for_psy_dim(data_processor,
+                                                         psy_dim,
+                                                         n_layer)
+
+                title = f'Layer {n_layer} {psy_dim} Prediction - ' \
+                        f'Train R²: {data_record["mse_train"]:.2f}, ' \
+                        f'MSE: {data_record["R2_train"]:.2f} | ' \
+                        f'Val R²: {data_record["mse_val"]:.2f}, ' \
+                        f'MSE: {data_record["R2_"]:.2f} ' \
+                        # f'(Model: {self.ml_model_key})'
+
                 plot_predictions_probe(df_plot=data_processor.df_layer,
                                        psy_dim=psy_dim,
-                                       n_layer=n_layer,
-                                       n_exp=self.n_experiment,
+                                       title=title,
                                        y_lim_min=-5,
                                        y_lim_max=5
                                        )
 
-        plot_results_from_probes(self.df_results, n_exp=self.n_experiment)
+        plot_results_from_probes(self.df_results,
+                                 n_exp=self.n_experiment,
+                                 y_lim=[0, 1])
