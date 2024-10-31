@@ -164,7 +164,7 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
              )
 
     # Plot PSY_DIM standard deviation as thin dotted lines
-    df_grouped[f'{psy_dim}_std'].describe()
+    print(df_grouped[f'{psy_dim}_std'].describe())
     print("NaN counts in each column:\n", df_grouped.isna().sum())
 
     plt.plot(df_grouped['word'],
@@ -207,25 +207,25 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
     plt.scatter(df_test_data['word'],
                 df_test_data[f'{psy_dim}_pred_mean'],
                 label=f'{psy_dim}_pred (Test)',
-                color='black',
+                color='red',
                 marker='x',
-                s=scatter_dot_size)
-
-    plt.xlabel('Words')
-    plt.ylabel('Values')
-    plt.title(title)
+                s=10)
 
     # Efficiently handling word labels on x-axis
-    n = 100
+    n = 70
     plt.xticks(range(0, len(df_grouped['word']), n), df_grouped['word'][::n],
                rotation=90, fontsize=8)
     plt.gca().set_xticklabels(df_grouped['word'][::n], rotation=90, ha='center')
 
     plt.ylim(y_lim_min, y_lim_max)
 
+    plt.xlabel(f'Words (every {n}nth word shown')
+    plt.ylabel('Psy Dimension Value')
+    plt.title(title)
+
     # leyend showing out of the graph without affecting its size
     # Set legend outside of the plot
-    plt.legend(loc='upper left', bbox_to_anchor=(1, 1), borderaxespad=0.)
+    plt.legend(loc='upper left', bbox_to_anchor=(1.1, 1), borderaxespad=0.)
     plt.tight_layout()
     plt.subplots_adjust(right=0.85)
 
@@ -252,7 +252,7 @@ def plot_results_from_probes(df_results,
     plt.title(
         f'R2 Validation Score vs nth layer by psy_dim for experiment {n_exp}')
 
-    plt.legend(loc='upper left', bbox_to_anchor=(1, 1), borderaxespad=0.,
+    plt.legend(loc='upper left', bbox_to_anchor=(1.1, 1), borderaxespad=0.,
                title="psy_dim")
     plt.tight_layout()
     plt.subplots_adjust(right=0.85)
