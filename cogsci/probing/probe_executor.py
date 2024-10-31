@@ -84,7 +84,7 @@ def _plot_predictions_probe(df_plot,
                 label=f'{psy_dim}_pred (Test)',
                 color='green',
                 marker='x',
-                s=20)
+                s=2)
 
     plt.xlabel('Words')
     plt.ylabel('Values')
@@ -103,7 +103,6 @@ def _plot_predictions_probe(df_plot,
 
 
 def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
-
     # Group by 'word' and keep 'set' information
     df_grouped = df_plot.groupby('word').agg({
         f'{psy_dim}': ['mean', 'std'],
@@ -112,13 +111,18 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
 
     print("df_grouped columns", df_grouped.columns)
 
-    # Flatten the multi-level columns after grouping
-    df_grouped.columns = ['word',
-                          f'{psy_dim}_mean',
-                          f'{psy_dim}_std',
-                          f'{psy_dim}_pred_mean',
-                          f'{psy_dim}_pred_std'
-                          ]
+    # Flatten the multi-level columns after grouping and renaming
+    df_grouped.columns = [
+        '_'.join(col).strip() if isinstance(col, tuple) else col
+        for col in df_grouped.columns
+    ]
+
+    df_grouped = df_grouped.rename(columns={
+        f'{psy_dim}_mean_mean': f'{psy_dim}_mean',
+        f'{psy_dim}_mean_std': f'{psy_dim}_std',
+        f'{psy_dim}_pred_mean_mean': f'{psy_dim}_pred_mean',
+        f'{psy_dim}_pred_mean_std': f'{psy_dim}_pred_std'
+    })
 
     # Map 'set' information from the original df_plot
     # Assuming that each 'word' uniquely belongs to either 'train' or 'test'
@@ -138,6 +142,20 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
              linewidth=2
              )
 
+    # Plot PSY_DIM standard deviation as thin dotted lines
+    plt.plot(df_grouped['word'],
+             df_grouped[f'{psy_dim}_mean'] + df_grouped[f'{psy_dim}_std'],
+             linestyle='dotted',
+             color=COLOR_MAP[psy_dim],
+             linewidth=1,
+             label=f'{psy_dim} Std Dev')
+    plt.plot(df_grouped['word'],
+             df_grouped[f'{psy_dim}_mean'] - df_grouped[f'{psy_dim}_std'],
+             linestyle='dotted',
+             color=COLOR_MAP[psy_dim],
+             linewidth=1
+             )
+
     # Shaded prediction std zone
     plt.fill_between(
         df_grouped['word'],
@@ -151,20 +169,21 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
     # Separate scatter plots for train and test sets
     train_data = df_grouped[df_grouped['set'] == 'train']
     test_data = df_grouped[df_grouped['set'] == 'test']
+    scatter_dot_size = 2
 
     plt.scatter(train_data['word'],
                 train_data[f'{psy_dim}_pred_mean'],
                 label=f'{psy_dim}_pred (Train)',
                 color='black',
                 marker='o',
-                s=20)
+                s=scatter_dot_size)
 
     plt.scatter(test_data['word'],
                 test_data[f'{psy_dim}_pred_mean'],
                 label=f'{psy_dim}_pred (Test)',
                 color='black',
                 marker='x',
-                s=20)
+                s=scatter_dot_size)
 
     plt.xlabel('Words')
     plt.ylabel('Values')
@@ -177,8 +196,11 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
     plt.gca().set_xticklabels(df_grouped['word'][::n], rotation=90, ha='center')
 
     plt.ylim(y_lim_min, y_lim_max)
-    plt.legend()
-    plt.tight_layout()
+
+    # leyend showing out of the graph without affecting its size
+    # Set legend outside of the plot
+    plt.legend(loc='upper left', bbox_to_anchor=(1.05, 1), borderaxespad=0.)
+    plt.tight_layout(rect=[0, 0, 0.75, 1])
     plt.show()
 
 
@@ -202,8 +224,11 @@ def plot_results_from_probes(df_results,
     plt.title(
         f'R2 Validation Score vs nth layer by psy_dim for experiment {n_exp}')
 
-    if show_legend:
-        plt.legend(title='psy_dim')
+    plt.legend(loc='upper left',
+               bbox_to_anchor=(1.05, 1),
+               borderaxespad=0.,
+               title="psy_dim")
+    plt.tight_layout(rect=[0, 0, 0.75, 1])
 
     plt.grid(True)
 
