@@ -232,7 +232,7 @@ class ProbeExecutor:
                         f'Train R²: {data_record["mse_train"]:.2f}, ' \
                         f'MSE: {data_record["R2_train"]:.2f} | ' \
                         f'Val R²: {data_record["mse_val"]:.2f}, ' \
-                        f'MSE: {data_record["R2_"]:.2f} ' \
+                        f'MSE: {data_record["R2_val"]:.2f} ' \
                         # f'(Model: {self.ml_model_key})'
 
                 plot_predictions_probe(df_plot=data_processor.df_layer,
