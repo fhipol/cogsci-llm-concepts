@@ -149,14 +149,14 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
     plt.scatter(train_data['word'],
                 train_data[f'{psy_dim}_pred_mean'],
                 label=f'{psy_dim}_pred (Train)',
-                color='red',
+                color='black',
                 marker='o',
                 s=20)
 
     plt.scatter(test_data['word'],
                 test_data[f'{psy_dim}_pred_mean'],
                 label=f'{psy_dim}_pred (Test)',
-                color='green',
+                color='black',
                 marker='x',
                 s=20)
 
