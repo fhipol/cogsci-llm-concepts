@@ -104,14 +104,32 @@ def _plot_predictions_probe(df_plot,
 
 def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
     # Group by 'word' and keep 'set' information
-    df_grouped = df_plot.groupby('word').agg({
+    df_grouped = df_plot.groupby('word', as_index=False).agg({
         f'{psy_dim}': ['mean', 'std'],
         f'{psy_dim}_pred': ['mean', 'std']
-    }).reset_index()
+    })
 
     print("df_grouped columns", df_grouped.columns)
 
     # Flatten the multi-level columns after grouping and renaming
+    df_grouped.columns = ['_'.join(col).strip('_')
+                          for col in df_grouped.columns]
+
+    # Rename columns if necessary to be more readable
+    df_grouped.rename(columns={
+        f'{psy_dim}_mean': f'{psy_dim}_mean',
+        f'{psy_dim}_std': f'{psy_dim}_std',
+        f'{psy_dim}_pred_mean': f'{psy_dim}_pred_mean',
+        f'{psy_dim}_pred_std': f'{psy_dim}_pred_std'
+    }, inplace=False)
+
+    # Rename columns if necessary to be more readable
+    df_grouped.rename(columns={
+        f'{psy_dim}_mean': f'{psy_dim}_mean',
+        f'{psy_dim}_std': f'{psy_dim}_std',
+        f'{psy_dim}_pred_mean': f'{psy_dim}_pred_mean',
+        f'{psy_dim}_pred_std': f'{psy_dim}_pred_std'
+    }, inplace=False)
     df_grouped.columns = [
         '_'.join(col).strip() if isinstance(col, tuple) else col
         for col in df_grouped.columns
@@ -206,8 +224,9 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
 
 def plot_results_from_probes(df_results,
                              n_exp: int,
-                             y_lim: tuple = None,
-                             show_legend: bool = False):
+                             y_lim: tuple = None
+                             ):
+
     plt.figure(figsize=(10, 6))
 
     for psy_dim in df_results['psy_dim'].unique():
