@@ -105,19 +105,25 @@ def _plot_predictions_probe(df_plot,
 def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
 
     # Group by 'word' and keep 'set' information
-    df_grouped = df_plot.groupby(['word', 'set'], as_index=False).agg({
+    df_grouped = df_plot.groupby('word').agg({
         f'{psy_dim}': ['mean', 'std'],
         f'{psy_dim}_pred': ['mean', 'std']
-    })
+    }).reset_index()
+
+    print("df_grouped columns", df_grouped.columns)
 
     # Flatten the multi-level columns after grouping
     df_grouped.columns = ['word',
-                          'set',
                           f'{psy_dim}_mean',
                           f'{psy_dim}_std',
                           f'{psy_dim}_pred_mean',
                           f'{psy_dim}_pred_std'
                           ]
+
+    # Map 'set' information from the original df_plot
+    # Assuming that each 'word' uniquely belongs to either 'train' or 'test'
+    set_map = df_plot.drop_duplicates('word').set_index('word')['set']
+    df_grouped['set'] = df_grouped['word'].map(set_map)
 
     # Sorting by the psychological dimension mean for better visualization
     df_grouped = df_grouped.sort_values(by=f'{psy_dim}_mean')
@@ -313,10 +319,10 @@ class ProbeExecutor:
                                                          n_layer)
 
                 title = f'Layer {n_layer} {psy_dim} Prediction - ' \
-                        f'Train R²: {data_record["mse_train"]:.2f}, ' \
-                        f'MSE: {data_record["R2_train"]:.2f} | ' \
-                        f'Val R²: {data_record["mse_val"]:.2f}, ' \
-                        f'MSE: {data_record["R2_val"]:.2f} ' \
+                        f'Train MSE: {data_record["mse_train"]:.2f}, ' \
+                        f'Train R²: {data_record["R2_train"]:.2f} | ' \
+                        f'Val MSE: {data_record["mse_val"]:.2f}, ' \
+                        f'Val R²: {data_record["R2_val"]:.2f} ' \
                     # f'(Model: {self.ml_model_key})'
 
                 plot_predictions_probe(df_plot=data_processor.df_layer,
