@@ -103,6 +103,8 @@ def _plot_predictions_probe(df_plot,
 
 
 def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
+    print(f"SET 1: {df_plot['set'].unique()}")
+
     # Group by 'word' and keep 'set' information
     df_grouped = df_plot.groupby('word', as_index=False).agg({
         f'{psy_dim}': ['mean', 'std'],
@@ -146,6 +148,7 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
     # Assuming that each 'word' uniquely belongs to either 'train' or 'test'
     set_map = df_plot.drop_duplicates('word').set_index('word')['set']
     df_grouped['set'] = df_grouped['word'].map(set_map)
+    print(f"SET 2: {df_grouped['set'].unique()}")
 
     # Sorting by the psychological dimension mean for better visualization
     df_grouped = df_grouped.sort_values(by=f'{psy_dim}_mean')
@@ -161,6 +164,9 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
              )
 
     # Plot PSY_DIM standard deviation as thin dotted lines
+    df_grouped[f'{psy_dim}_std'].describe()
+    print("NaN counts in each column:\n", df_grouped.isna().sum())
+
     plt.plot(df_grouped['word'],
              df_grouped[f'{psy_dim}_mean'] + df_grouped[f'{psy_dim}_std'],
              linestyle='dotted',
@@ -185,19 +191,21 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
     )
 
     # Separate scatter plots for train and test sets
-    train_data = df_grouped[df_grouped['set'] == 'train']
-    test_data = df_grouped[df_grouped['set'] == 'test']
+    df_train_data = df_grouped[df_grouped['set'] == 'train']
+    df_test_data = df_grouped[df_grouped['set'] == 'test']
+    print("Test data size:", df_test_data.shape)
+    print("Train data size:", df_train_data.shape)
     scatter_dot_size = 2
 
-    plt.scatter(train_data['word'],
-                train_data[f'{psy_dim}_pred_mean'],
+    plt.scatter(df_train_data['word'],
+                df_train_data[f'{psy_dim}_pred_mean'],
                 label=f'{psy_dim}_pred (Train)',
                 color='black',
                 marker='o',
                 s=scatter_dot_size)
 
-    plt.scatter(test_data['word'],
-                test_data[f'{psy_dim}_pred_mean'],
+    plt.scatter(df_test_data['word'],
+                df_test_data[f'{psy_dim}_pred_mean'],
                 label=f'{psy_dim}_pred (Test)',
                 color='black',
                 marker='x',
@@ -217,8 +225,10 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
 
     # leyend showing out of the graph without affecting its size
     # Set legend outside of the plot
-    plt.legend(loc='upper left', bbox_to_anchor=(1.05, 1), borderaxespad=0.)
-    plt.tight_layout(rect=[0, 0, 0.75, 1])
+    plt.legend(loc='upper left', bbox_to_anchor=(1, 1), borderaxespad=0.)
+    plt.tight_layout()
+    plt.subplots_adjust(right=0.85)
+
     plt.show()
 
 
@@ -226,7 +236,6 @@ def plot_results_from_probes(df_results,
                              n_exp: int,
                              y_lim: tuple = None
                              ):
-
     plt.figure(figsize=(10, 6))
 
     for psy_dim in df_results['psy_dim'].unique():
@@ -243,11 +252,10 @@ def plot_results_from_probes(df_results,
     plt.title(
         f'R2 Validation Score vs nth layer by psy_dim for experiment {n_exp}')
 
-    plt.legend(loc='upper left',
-               bbox_to_anchor=(1.05, 1),
-               borderaxespad=0.,
+    plt.legend(loc='upper left', bbox_to_anchor=(1, 1), borderaxespad=0.,
                title="psy_dim")
-    plt.tight_layout(rect=[0, 0, 0.75, 1])
+    plt.tight_layout()
+    plt.subplots_adjust(right=0.85)
 
     plt.grid(True)
 
