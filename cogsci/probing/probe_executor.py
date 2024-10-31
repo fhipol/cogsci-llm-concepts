@@ -216,7 +216,7 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
     plt.title(title)
 
     # Efficiently handling word labels on x-axis
-    n = 20
+    n = 100
     plt.xticks(range(0, len(df_grouped['word']), n), df_grouped['word'][::n],
                rotation=90, fontsize=8)
     plt.gca().set_xticklabels(df_grouped['word'][::n], rotation=90, ha='center')
