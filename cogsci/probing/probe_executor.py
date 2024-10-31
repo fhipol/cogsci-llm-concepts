@@ -103,18 +103,21 @@ def _plot_predictions_probe(df_plot,
 
 
 def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
+
     # Group by 'word' and keep 'set' information
-    df_grouped = df_plot.groupby(['word', 'set']).agg({
+    df_grouped = df_plot.groupby(['word', 'set'], as_index=False).agg({
         f'{psy_dim}': ['mean', 'std'],
         f'{psy_dim}_pred': ['mean', 'std']
-    }).reset_index()
+    })
 
     # Flatten the multi-level columns after grouping
-    df_grouped.columns = ['word', 'set',
+    df_grouped.columns = ['word',
+                          'set',
                           f'{psy_dim}_mean',
                           f'{psy_dim}_std',
                           f'{psy_dim}_pred_mean',
-                          f'{psy_dim}_pred_std']
+                          f'{psy_dim}_pred_std'
+                          ]
 
     # Sorting by the psychological dimension mean for better visualization
     df_grouped = df_grouped.sort_values(by=f'{psy_dim}_mean')
@@ -125,16 +128,19 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
     plt.plot(df_grouped['word'],
              df_grouped[f'{psy_dim}_mean'],
              label=f'{psy_dim}',
-             color='blue',  # Use a fixed color or COLOR_MAP if defined
-             linewidth=2)
+             color=COLOR_MAP[psy_dim],
+             linewidth=2
+             )
 
     # Shaded prediction std zone
-    plt.fill_between(df_grouped['word'],
-                     df_grouped[f'{psy_dim}_pred_mean'] - df_grouped[
-                         f'{psy_dim}_pred_std'],
-                     df_grouped[f'{psy_dim}_pred_mean'] + df_grouped[
-                         f'{psy_dim}_pred_std'],
-                     color='silver', alpha=0.5, label=f'{psy_dim}_pred_std')
+    plt.fill_between(
+        df_grouped['word'],
+        df_grouped[f'{psy_dim}_pred_mean'] - df_grouped[f'{psy_dim}_pred_std'],
+        df_grouped[f'{psy_dim}_pred_mean'] + df_grouped[f'{psy_dim}_pred_std'],
+        color='silver',
+        alpha=0.5,
+        label=f'{psy_dim}_pred_std'
+    )
 
     # Separate scatter plots for train and test sets
     train_data = df_grouped[df_grouped['set'] == 'train']
