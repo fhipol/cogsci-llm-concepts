@@ -192,7 +192,7 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
     df_test_data = df_grouped[df_grouped['set'] == 'test']
     print("Test data size:", df_test_data.shape)
     print("Train data size:", df_train_data.shape)
-    scatter_dot_size = 2
+    scatter_dot_size = 1
 
     plt.scatter(df_train_data['word'],
                 df_train_data[f'{psy_dim}_pred_mean'],
@@ -208,7 +208,7 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
                 facecolors='none',
                 edgecolors='black',
                 marker='s',
-                s=scatter_dot_size*2,
+                s=scatter_dot_size*4,
                 linewidths=0.5
                 )
 
