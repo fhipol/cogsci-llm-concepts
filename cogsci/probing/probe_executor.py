@@ -25,83 +25,6 @@ COLOR_MAP = {dim: plt.cm.get_cmap('tab10', len(PSY_DIMS))(i)
              }
 
 
-def _plot_predictions_probe(df_plot,
-                            psy_dim,
-                            title,
-                            y_lim_min=1,
-                            y_lim_max=9,
-                            ):
-    # Group by 'word' & calculate the mean & std for 'IMAG_M' and 'IMAG_M_pred'
-    group_by = 'word'
-
-    df_grouped = df_plot.groupby(group_by).agg({
-        f'{psy_dim}': ['mean', 'std'],
-        f'{psy_dim}_pred': ['mean', 'std']
-    }).reset_index()
-
-    df_grouped.columns = ['word',
-                          f'{psy_dim}_mean',
-                          f'{psy_dim}_std',
-                          f'{psy_dim}_pred_mean',
-                          f'{psy_dim}_pred_std'
-                          ]
-
-    df_grouped = df_grouped.sort_values(by=f'{psy_dim}_mean')
-
-    plt.figure(figsize=(12, 6))
-
-    # Plot actual PSY_DIM mean values as a smooth line
-    plt.plot(df_grouped['word'],
-             df_grouped[f'{psy_dim}_mean'],
-             label=f'{psy_dim}',
-             color=COLOR_MAP[psy_dim],
-             linewidth=2,
-             )
-
-    # Shaded prediction std zone
-    plt.fill_between(df_grouped['word'],
-                     df_grouped[f'{psy_dim}_pred_mean'] - df_grouped[
-                         f'{psy_dim}_pred_std'],
-                     df_grouped[f'{psy_dim}_pred_mean'] + df_grouped[
-                         f'{psy_dim}_pred_std'],
-                     color='silver',
-                     alpha=0.5,
-                     label=f'{psy_dim}_pred_std')
-
-    # Scatter plot for prediction mean values for TRAIN AND VAL
-    train_data = df_grouped[df_grouped['set'] == 'train']
-    test_data = df_grouped[df_grouped['set'] == 'test']
-
-    plt.scatter(train_data['word'],
-                train_data[f'{psy_dim}_pred_mean'],
-                label=f'{psy_dim}_pred (Train)',
-                color='red',
-                marker='o',
-                s=20)
-
-    plt.scatter(test_data['word'],
-                test_data[f'{psy_dim}_pred_mean'],
-                label=f'{psy_dim}_pred (Test)',
-                color='green',
-                marker='x',
-                s=2)
-
-    plt.xlabel('Words')
-    plt.ylabel('Values')
-    plt.title(title)
-
-    # Show every nth word on the x-axis (because they are thousands of words)
-    n = 20
-    plt.xticks(range(0, len(df_grouped['word']), n), df_grouped['word'][::n],
-               rotation=90, fontsize=8)
-    plt.gca().set_xticklabels(df_grouped['word'][::n], rotation=90, ha='center')
-
-    plt.ylim(y_lim_min, y_lim_max)
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
-
-
 def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
     print(f"SET 1: {df_plot['set'].unique()}")
 
@@ -197,7 +120,7 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
     plt.scatter(df_train_data['word'],
                 df_train_data[f'{psy_dim}_pred_mean'],
                 label=f'{psy_dim}_pred (Train)',
-                color='black',
+                color='#505050',
                 marker='o',
                 s=scatter_dot_size)
 
