@@ -293,7 +293,9 @@ class ProbeExecutor:
                                                          psy_dim,
                                                          n_layer)
 
-                title = f'Layer {n_layer} {psy_dim} Prediction - ' \
+                title = f'{psy_dim} prediction ' \
+                        f'for Experiment {self.n_experiment} ' \
+                        f'and Layer {n_layer} - ' \
                         f'Train MSE: {data_record["mse_train"]:.2f}, ' \
                         f'Train R²: {data_record["R2_train"]:.2f} | ' \
                         f'Val MSE: {data_record["mse_val"]:.2f}, ' \
