@@ -192,7 +192,7 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
     df_test_data = df_grouped[df_grouped['set'] == 'test']
     print("Test data size:", df_test_data.shape)
     print("Train data size:", df_train_data.shape)
-    scatter_dot_size = 3
+    scatter_dot_size = 2
 
     plt.scatter(df_train_data['word'],
                 df_train_data[f'{psy_dim}_pred_mean'],
@@ -208,8 +208,8 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
                 facecolors='none',
                 edgecolors='black',
                 marker='s',
-                s=scatter_dot_size,
-                linewidths=1
+                s=scatter_dot_size*2,
+                linewidths=0.5
                 )
 
     # Efficiently handling word labels on x-axis
@@ -220,7 +220,7 @@ def plot_predictions_probe(df_plot, psy_dim, title, y_lim_min=1, y_lim_max=9):
 
     plt.ylim(y_lim_min, y_lim_max)
 
-    plt.xlabel(f'Words (every {n}nth word shown')
+    plt.xlabel(f'Words (every {n}nth word shown)')
     plt.ylabel('Psy Dimension Value')
     plt.title(title)
 
